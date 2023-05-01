@@ -4,6 +4,7 @@ namespace EmpactProject.Repository
 {
     public interface INewsRepository
     {
-       List<News> GetNews();
+        List<News> NewsList { get; set; }
+        Task SerializeXML();
     }
 }

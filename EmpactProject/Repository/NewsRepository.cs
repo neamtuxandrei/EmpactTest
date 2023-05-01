@@ -1,4 +1,5 @@
 ﻿using EmpactProject.Model;
+using EmpactProject.Services;
 using System;
 using System.Globalization;
 using System.Net;
@@ -9,64 +10,63 @@ namespace EmpactProject.Repository
 {
     public class NewsRepository : INewsRepository
     {
-        private string _url = "https://rss.nytimes.com/services/xml/rss/nyt/World.xml";
-        private List<News> _news;
+        private const string _url = "https://rss.nytimes.com/services/xml/rss/nyt/World.xml";
+        public List<News> NewsList { get; set; }
 
         public NewsRepository()
         {
-            _news = new List<News>();
-            SerializeXML();
+           NewsList = new List<News>();
+           SerializeXML(); 
         }
 
-        public List<News> GetNews()
+        public async Task SerializeXML()
         {
-            return _news;
-        }
-
-        private void SerializeXML()
-        {
-            XmlSerializer serializer = new XmlSerializer(typeof(News), new XmlRootAttribute("item"));
-            using (WebClient client = new())
+            using (HttpClient client = new HttpClient())
             {
-                using (XmlReader reader = XmlReader.Create(client.OpenRead(_url)))
+                using (Stream stream = await client.GetStreamAsync(_url))
                 {
-                    reader.ReadToFollowing("item");
-                    do
+                    using (XmlReader reader = XmlReader.Create(stream))
                     {
-                        XmlReader newsReader = reader.ReadSubtree();
-                        News newsItem = new();
-
-                        while (newsReader.Read())
+                        reader.ReadToFollowing("item");
+                        do
                         {
-                            if (newsReader.NodeType == XmlNodeType.Element)
+                            XmlReader newsReader = reader.ReadSubtree();
+                            News newsItem = new();
+
+                            while (newsReader.Read())
                             {
-                                switch (newsReader.Name)
+                                if (newsReader.NodeType == XmlNodeType.Element)
                                 {
-                                    case "title":
-                                        newsItem.Title = newsReader.ReadElementContentAsString();
-                                        break;
-                                    case "description":
-                                        newsItem.Description = newsReader.ReadElementContentAsString();
-                                        break;
-                                    case "link":
-                                        newsItem.Link = newsReader.ReadElementContentAsString();
-                                        break;
-                                    case "pubDate":
-                                        string pubDateString = newsReader.ReadElementContentAsString();
-                                        newsItem.PublicationDate = DateTime.ParseExact(
-                                            pubDateString,
-                                            "ddd, dd MMM yyyy HH:mm:ss zzz",
-                                            CultureInfo.InvariantCulture);
-                                        break;
+                                    switch (newsReader.Name)
+                                    {
+                                        case "title":
+                                            newsItem.Title = newsReader.ReadElementContentAsString();
+                                            break;
+                                        case "description":
+                                            newsItem.Description = newsReader.ReadElementContentAsString();
+                                            break;
+                                        case "link":
+                                            newsItem.Link = newsReader.ReadElementContentAsString();
+                                            break;
+                                        case "pubDate":
+                                            string pubDateString = newsReader.ReadElementContentAsString();
+                                            newsItem.PublicationDate = DateTime.ParseExact(
+                                                pubDateString,
+                                                "ddd, dd MMM yyyy HH:mm:ss zzz",
+                                                CultureInfo.InvariantCulture);
+                                            break;
+                                    }
                                 }
                             }
-                        }
 
-                        _news.Add(newsItem);
-                    } while (reader.ReadToFollowing("item"));
+                            NewsList.Add(newsItem);
+                        } while (reader.ReadToFollowing("item"));
+                    }
                 }
             }
         }
+
+
     }
 }
 
