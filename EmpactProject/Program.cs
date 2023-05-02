@@ -1,14 +1,18 @@
 using EmpactProject.Model;
-using EmpactProject.Repository;
 using EmpactProject.Services;
 using System.Text.Json.Serialization;
-
+using Microsoft.EntityFrameworkCore;
+using EmpactProject.Data.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddSqlServer<AppDbContext>(opt => opt.UseSqlServer(connectionString));
+builder.Services.AddDbContext<AppDbContext>(options
+    => options.UseSqlServer(connectionString));
+
+
+
 
 builder.Services.AddControllers().AddJsonOptions(options =>
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())); ;

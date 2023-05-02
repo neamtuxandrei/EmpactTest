@@ -1,10 +1,10 @@
-﻿using EmpactProject.Model;
+﻿using EmpactProject.Data.Model;
+using EmpactProject.Data.Repository;
+using EmpactProject.Model;
 using EmpactProject.Model.Enums;
-using EmpactProject.Repository;
 using EmpactProject.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Extensions;
-using System.Reflection.Metadata.Ecma335;
+using Microsoft.IdentityModel.Tokens;
 
 namespace EmpactProject.Controllers
 {
@@ -32,6 +32,22 @@ namespace EmpactProject.Controllers
             if (string.IsNullOrEmpty(key))
                 return BadRequest("Key not valid.");
             return Ok(_newsService.GetNewsByKey(key));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveList(List<News> news)
+        {
+            if (news.IsNullOrEmpty())
+                return BadRequest("List isn't valid.");
+            try
+            {
+                _newsRepository.SaveListToDb(news);
+                await _newsRepository.SaveChangesAsync();
+                return Ok("List saved!");
+            }catch(Exception ex)
+            {
+                return new ObjectResult(ex);
+            }
         }
     }
 }

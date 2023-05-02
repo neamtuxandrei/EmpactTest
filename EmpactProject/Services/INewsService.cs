@@ -1,4 +1,4 @@
-﻿using EmpactProject.Model;
+﻿using EmpactProject.Data.Model;
 using EmpactProject.Model.Enums;
 
 namespace EmpactProject.Services

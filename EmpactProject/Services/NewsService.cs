@@ -1,10 +1,10 @@
-﻿using EmpactProject.Model;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Net;
 using System.Xml.Serialization;
 using System.Xml;
 using EmpactProject.Model.Enums;
-using EmpactProject.Repository;
+using EmpactProject.Data.Model;
+using EmpactProject.Data.Repository;
 
 namespace EmpactProject.Services
 {
