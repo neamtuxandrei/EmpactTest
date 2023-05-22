@@ -12,26 +12,27 @@ namespace EmpactProject.Controllers
     [ApiController]
     public class NewsController : ControllerBase
     {
-        private readonly INewsRepository _newsRepository;
+
         private readonly INewsService _newsService;
-        public NewsController(INewsRepository newsRepository,INewsService newsService)
+        public NewsController(INewsService newsService)
         {
-            _newsRepository = newsRepository;
             _newsService = newsService;
         }
         [HttpGet]
-        public IActionResult GetSortedNews([FromQuery] SortBy sortBy, OrderBy orderBy)
+        public async Task<IActionResult> GetSortedNews([FromQuery] SortBy sortBy, OrderBy orderBy)
         {
-            return Ok(_newsService.SortNews(sortBy,orderBy));
+            var response = await _newsService.SortNews(sortBy, orderBy);
+            return Ok(response);
         }
 
         [Route("key")]
         [HttpGet]
-        public IActionResult GetNewsByKey(string key)
+        public async Task<IActionResult> GetNewsByKey(string key)
         {
             if (string.IsNullOrEmpty(key))
                 return BadRequest("Key not valid.");
-            return Ok(_newsService.GetNewsByKey(key));
+            var response = await _newsService.GetNewsByKey(key);
+            return Ok(response);
         }
 
         [HttpPost]
@@ -41,8 +42,7 @@ namespace EmpactProject.Controllers
                 return BadRequest("List isn't valid.");
             try
             {
-                _newsRepository.SaveListToDb(news);
-                await _newsRepository.SaveChangesAsync();
+                await _newsService.SaveNews(news);
                 return Ok("List saved!");
             }catch(Exception ex)
             {

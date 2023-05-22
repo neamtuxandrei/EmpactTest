@@ -5,7 +5,8 @@ namespace EmpactProject.Services
 {
     public interface INewsService
     {
-        List<News> SortNews(SortBy sortBy, OrderBy orderBy);
-        List<News> GetNewsByKey(string key);
+        Task<List<News>> SortNews(SortBy sortBy, OrderBy orderBy);
+        Task<List<News>> GetNewsByKey(string key);
+        Task SaveNews(List<News> news);
     }
 }

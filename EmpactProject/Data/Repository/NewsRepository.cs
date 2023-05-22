@@ -10,13 +10,11 @@ namespace EmpactProject.Data.Repository
     public class NewsRepository : INewsRepository
     {
         private const string _url = "https://rss.nytimes.com/services/xml/rss/nyt/World.xml";
-        public List<News> NewsList { get; set; }
+        
         private readonly AppDbContext _dbContext;
 
         public NewsRepository(AppDbContext appDbContext)
         {
-            NewsList = new List<News>();
-            SerializeXML();
             _dbContext = appDbContext;
         }
 
@@ -33,8 +31,9 @@ namespace EmpactProject.Data.Repository
         }
 
 
-        public async Task SerializeXML()
+        public async Task<List<News>> SerializeXML()
         {
+            List<News> newsList = new List<News>();
             using (HttpClient client = new HttpClient())
             {
                 using (Stream stream = await client.GetStreamAsync(_url))
@@ -73,11 +72,12 @@ namespace EmpactProject.Data.Repository
                                 }
                             }
 
-                            NewsList.Add(newsItem);
+                            newsList.Add(newsItem);
                         } while (reader.ReadToFollowing("item"));
                     }
                 }
             }
+            return newsList;
         }
 
 

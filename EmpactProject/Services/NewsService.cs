@@ -16,24 +16,32 @@ namespace EmpactProject.Services
             _newsRepository = newsRepository;
         }
 
-        public List<News> GetNewsByKey(string key)
+        public async Task<List<News>> GetNewsByKey(string key)
         {
-            return _newsRepository.NewsList.Where(news => news.Title
+            var list = await _newsRepository.SerializeXML();
+            return list.Where(news => news.Title
             .Contains(key, StringComparison.OrdinalIgnoreCase) || news.Description
             .Contains(key, StringComparison.OrdinalIgnoreCase) || news.Link
             .Contains(key, StringComparison.OrdinalIgnoreCase)).ToList();
         }
 
-        public List<News> SortNews(SortBy sortBy, OrderBy orderBy)
+        public Task SaveNews(List<News> news)
         {
+            _newsRepository.SaveListToDb(news);
+            return _newsRepository.SaveChangesAsync();
+        }
+
+        public async Task<List<News>> SortNews(SortBy sortBy, OrderBy orderBy)
+        {
+            var list = await _newsRepository.SerializeXML();
             var sortedList = new List<News>();
             switch (sortBy)
             {
                 case SortBy.PublicationDate:
-                    sortedList = orderBy == OrderBy.Ascending ? _newsRepository.NewsList.OrderBy(d => d.PublicationDate).ToList() : _newsRepository.NewsList.OrderByDescending(d => d.PublicationDate).ToList();
+                    sortedList = orderBy == OrderBy.Ascending ? list.OrderBy(d => d.PublicationDate).ToList() : list.OrderByDescending(d => d.PublicationDate).ToList();
                     break;
                 case SortBy.Title:
-                    sortedList = orderBy == OrderBy.Ascending ? _newsRepository.NewsList.OrderBy(t => t.Title).ToList() : _newsRepository.NewsList.OrderByDescending(t => t.Title).ToList();
+                    sortedList = orderBy == OrderBy.Ascending ? list.OrderBy(t => t.Title).ToList() : list.OrderByDescending(t => t.Title).ToList();
                     break;
             }
             return sortedList;
